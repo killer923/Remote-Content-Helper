@@ -5,7 +5,7 @@
 	<artifactId>Remote-API</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Remote Content Helper</name>
-	<description>provides an api for fetching data REST API</description>
+	<description>provides an api for fetching data REST API. For more details, see https://github.com/killer923/Remote-Content-Helper</description>
 	<properties>
 		<version.spring>4.0.0.RELEASE</version.spring>
 	</properties>
