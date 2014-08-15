@@ -12,5 +12,5 @@ For adding in maven :
 		<groupId>com.killer923.dataFetcher</groupId>
 		<artifactId>Remote-API</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-		<url>http://maven.killer.heliohost.org</ur>
+		<url>http://maven.killer.heliohost.org</url>
 	</dependency>
