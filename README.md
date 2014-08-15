@@ -4,21 +4,34 @@ This provides an API for fetching remote content.
 
 Currently Supports : 
 =====================
-	HTTP
 	
-For adding in maven :
+	->HTTP
+	
+
+To use :
 =====================
-Add under <dependencies> 
 
-	<dependency>
-		<groupId>com.killer923.dataFetcher</groupId>
-		<artifactId>Remote-Content-Helper</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-	</dependency>
+Directly adding jar:
+============
+You can download the jar file from http://killer.heliohost.org/maven/com/killer923/dataFetcher/Remote-Content-Helper/0.0.1-SNAPSHOT/Remote-Content-Helper-0.0.1-SNAPSHOT.jar
+and add it to your buold path.
 
-Add under <repositories>
+Maven:
+============
+In pom.xml of your project, <br>
+Add dependency
 
+	<dependencies> 
+		<dependency>
+			<groupId>com.killer923.dataFetcher</groupId>
+			<artifactId>Remote-Content-Helper</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
 
+Add repository 
+
+	<repositories>
 		<repository>
 			<releases>
 				<enabled>true</enabled>
@@ -30,3 +43,4 @@ Add under <repositories>
 			<url>http://killer.heliohost.org/maven</url>
 			<layout>default</layout>
 		</repository>
+	</repositories>
