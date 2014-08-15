@@ -8,15 +8,10 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import com.killer923.dataFetcher.net.api.RequestDispatcher;
 import com.killer923.dataFetcher.net.api.exception.ResponseException;
 
-@Component("HttpService")
-@Scope((BeanDefinition.SCOPE_SINGLETON))
 public class HttpRequestDispatcher implements RequestDispatcher
 {
 	private int retryCount = 3;
