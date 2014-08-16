@@ -1,5 +1,6 @@
 package com.killer923.dataFetcher.net.http.test;
 
+import org.apache.commons.httpclient.Header;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,7 +20,13 @@ public class RequestTest
 	@Test
 	public void testSendGETRequest() throws ResponseException
 	{
-		ResponseWrapper response= httpRequestDispatcher.sendGETRequest("http://google.com");
+		ResponseWrapper response= httpRequestDispatcher.sendGETRequest("http://cmsv.indiatimes.com/cmslite/api/lite/dummyGet");
 		System.out.println(response);
+		System.out.println(new String(response.getResponse()));
+		Header[] headers = response.getHeaders();
+		for(Header header : headers)
+		{
+			System.out.println(header);
+		}
 	}
 }

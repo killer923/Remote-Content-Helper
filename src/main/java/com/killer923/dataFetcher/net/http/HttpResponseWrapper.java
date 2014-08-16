@@ -2,22 +2,27 @@ package com.killer923.dataFetcher.net.http;
 
 import java.util.Arrays;
 
+import org.apache.commons.httpclient.Header;
+
 import com.killer923.dataFetcher.net.api.ResponseWrapper;
 
-public class HTTPResponseWrapper implements ResponseWrapper
+
+public final class HttpResponseWrapper implements ResponseWrapper
 {
 	private final int statusCode;
 	private final byte[] response;
 	private final String statusMessage;
+	private Header[] headers;
 
-	protected HTTPResponseWrapper(int statusCode, byte[] response)
+	protected HttpResponseWrapper(int statusCode, byte[] response, Header[] responseHeaders)
 	{
 		this.statusCode = statusCode;
 		this.response = response;
 		this.statusMessage = "OK";
+		this.headers = responseHeaders;
 	}
 
-	protected HTTPResponseWrapper(int statusCode, String statusMessage, byte[] response)
+	protected HttpResponseWrapper(int statusCode, String statusMessage, byte[] response)
 	{
 		this.statusCode = statusCode;
 		this.statusMessage = statusMessage;
@@ -39,10 +44,15 @@ public class HTTPResponseWrapper implements ResponseWrapper
 		return new String(statusMessage);
 	}
 	
+	public final Header[] getHeaders()
+	{
+		return Arrays.copyOf(headers,headers.length);
+	}
+
 	@Override
 	public String toString()
 	{
-		return "HTTPResponseWrapper [statusCode=" + statusCode + ", response=" + Arrays.toString(response) + ", statusMessage=" + statusMessage + "]";
+		return "HttpResponseWrapper [statusCode=" + statusCode + ", response=" + Arrays.toString(response) + ", statusMessage=" + statusMessage + ", headers=" + Arrays.toString(headers) + "]";
 	}
 
 }

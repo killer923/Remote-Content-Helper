@@ -1,5 +1,7 @@
 package com.killer923.dataFetcher.net.api;
 
+import org.apache.commons.httpclient.Header;
+
 /**
  * All classes implementing this {@link ResponseWrapper} are immutable.
  * 
@@ -20,4 +22,9 @@ public interface ResponseWrapper
 	 * @return the status message of respose.
 	 */
 	public String getStatusMessage();
+	/**
+	 * 
+	 * @return the Headers recieved in response
+	 */
+	public Header[] getHeaders();
 }

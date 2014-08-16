@@ -16,7 +16,7 @@ public class HttpRequestDispatcher implements RequestDispatcher
 {
 	private int retryCount = 3;
 
-	public HTTPResponseWrapper sendGETRequest(String url) throws ResponseException
+	public HttpResponseWrapper sendGETRequest(String url) throws ResponseException
 	{
 		// Create an instance of HttpClient.
 		HttpClient client = new HttpClient();
@@ -27,7 +27,7 @@ public class HttpRequestDispatcher implements RequestDispatcher
 		// Provide custom retry handler is necessary
 		method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(retryCount, false));
 
-		HTTPResponseWrapper response = null;
+		HttpResponseWrapper response = null;
 		
 		// Execute the method.
 		try
@@ -36,10 +36,10 @@ public class HttpRequestDispatcher implements RequestDispatcher
 			byte[] responseBody = method.getResponseBody();
 			if (statusCode == HttpStatus.SC_OK)
 			{
-				response = new HTTPResponseWrapper(statusCode, responseBody);
+				response = new HttpResponseWrapper(statusCode, responseBody,method.getResponseHeaders());
 			} else
 			{
-				response = new HTTPResponseWrapper(statusCode, method.getStatusLine().toString(), responseBody);
+				response = new HttpResponseWrapper(statusCode, method.getStatusLine().toString(), responseBody);
 			}
 		} catch (HttpException httpe)
 		{
