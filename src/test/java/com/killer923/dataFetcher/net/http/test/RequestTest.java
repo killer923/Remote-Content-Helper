@@ -20,7 +20,7 @@ public class RequestTest
 	@Test
 	public void testSendGETRequest() throws ResponseException
 	{
-		ResponseWrapper response= httpRequestDispatcher.sendGETRequest("http://cmsv.indiatimes.com/cmslite/api/lite/dummyGet");
+		ResponseWrapper response= httpRequestDispatcher.sendGETRequest("http://google.com/blank.html",null);
 		System.out.println(response);
 		System.out.println(new String(response.getResponse()));
 		Header[] headers = response.getHeaders();
