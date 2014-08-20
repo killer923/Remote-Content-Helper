@@ -14,7 +14,7 @@ To use :
 Directly adding jar:
 ============
 You can download the jar file from http://killer.heliohost.org/maven/com/killer923/dataFetcher/Remote-Content-Helper/0.0.1-SNAPSHOT/Remote-Content-Helper-0.0.1-SNAPSHOT.jar
-and add it to your buold path.
+and add it to your build path.
 
 Maven:
 ============
