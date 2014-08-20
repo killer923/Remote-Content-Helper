@@ -40,7 +40,7 @@ Add repository
 			</releases>
 			<id>com.killer923</id>
 			<name>killer Maven Repository</name>
-			<url>http://maven.killer.heliohost.org</url>
+			<url>http://killer.heliohost.org/maven</url>
 			<layout>default</layout>
 		</repository>
 	</repositories>
