@@ -1,6 +1,12 @@
 package com.killer923.dataFetcher.net.http.test;
 
-import org.apache.commons.httpclient.Header;
+import java.io.IOException;
+import java.util.Arrays;
+
+import org.apache.http.Header;
+import org.apache.http.ParseException;
+import org.apache.http.entity.ContentType;
+import org.apache.http.util.EntityUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,15 +24,11 @@ public class RequestTest
 	}
 	
 	@Test
-	public void testSendGETRequest() throws ResponseException
+	public void testSendGETRequest() throws ResponseException, ParseException, IOException
 	{
-		ResponseWrapper response= httpRequestDispatcher.sendGETRequest("http://google.com/blank.html",null);
+		ResponseWrapper response= httpRequestDispatcher.sendGETRequest("http://httpbin.org/get",null);
 		System.out.println(response);
-		System.out.println(new String(response.getResponse()));
 		Header[] headers = response.getHeaders();
-		for(Header header : headers)
-		{
-			System.out.println(header);
-		}
+		System.out.println(Arrays.toString(headers));
 	}
 }

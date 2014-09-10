@@ -14,6 +14,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 
 import com.killer923.dataFetcher.net.api.RequestDispatcher;
 import com.killer923.dataFetcher.net.api.ResponseWrapper;
@@ -29,27 +30,26 @@ public class HttpRequestDispatcher implements RequestDispatcher
 	{
 		return sendGETRequest(url, headers, null, null);
 	}
-	
+
 	@Override
-	public ResponseWrapper sendGETRequest(String url, Header[] headers,ResponseHandler<? extends ResponseWrapper> handler,HttpContext context) throws ResponseException
+	public ResponseWrapper sendGETRequest(String url, Header[] headers, ResponseHandler<? extends ResponseWrapper> handler, HttpContext context) throws ResponseException
 	{
 		// Create an instance of DefaultHttpClient.
-		CloseableHttpClient client = HttpClientBuilder.create().disableAutomaticRetries().setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount, true)).build();;
+		CloseableHttpClient client = HttpClientBuilder.create().disableAutomaticRetries().setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount, true)).build();
+		
 		// Create a method instance.
 		HttpGet request = new HttpGet(url);
 		//set headers
 		request.setHeaders(headers);
-		
-		if(handler == null)
+		if (handler == null)
 		{
-			handler =  new DefaultResponseHandler();
+			handler = new DefaultResponseHandler();
 		}
-		ResponseWrapper response;		
+		ResponseWrapper response;
 		// Execute the method.
 		try
 		{
-			response=client.execute(request,handler,context);
-			
+			response = client.execute(request, handler, context);
 		} catch (ClientProtocolException httpe)
 		{
 			System.err.println("Protocol error");
@@ -91,24 +91,25 @@ public class HttpRequestDispatcher implements RequestDispatcher
 	{
 		return sendPOSTRequest(url, content, headers, timeout, null, null);
 	}
+
 	@Override
-	public ResponseWrapper sendPOSTRequest(String url, HttpEntity content, Header[] headers, int timeout,ResponseHandler<? extends ResponseWrapper> responseHandler,HttpContext context) throws ResponseException
+	public ResponseWrapper sendPOSTRequest(String url, HttpEntity content, Header[] headers, int timeout, ResponseHandler<? extends ResponseWrapper> responseHandler, HttpContext context) throws ResponseException
 	{
 		//prepare for request
-		CloseableHttpClient client = HttpClientBuilder.create().disableAutomaticRetries().setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount, true)).build();;
-		
+		CloseableHttpClient client = HttpClientBuilder.create().disableAutomaticRetries().setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount, true)).build();
+		;
 		HttpPost method = new HttpPost(url);
 		method.setConfig(RequestConfig.custom().setExpectContinueEnabled(true).build());
 		method.setHeaders(headers);
 		method.setEntity(content);
-		if(responseHandler == null)
+		if (responseHandler == null)
 		{
 			responseHandler = new DefaultResponseHandler();
 		}
-		ResponseWrapper response =null;
+		ResponseWrapper response = null;
 		try
 		{//make the request
-			response =client.execute(method, responseHandler, context);
+			response = client.execute(method, responseHandler, context);
 		} catch (ClientProtocolException httpe)
 		{
 			System.err.println("Protocol error");
@@ -141,18 +142,25 @@ public class HttpRequestDispatcher implements RequestDispatcher
 	static class DefaultResponseHandler implements ResponseHandler<ResponseWrapper>
 	{
 		@Override
-		public ResponseWrapper handleResponse(HttpResponse response) throws ClientProtocolException, IOException
+		public ResponseWrapper handleResponse(HttpResponse response) throws IOException
 		{
 			ResponseWrapper interpretedResponse;
 			int statusCode = response.getStatusLine().getStatusCode();
 			HttpEntity entity = response.getEntity();
-			if (statusCode >= 200 && statusCode <300)
+//			try
+//			{
+//				EntityUtils.consume(entity);
+//			} catch (IOException e)
+//			{
+//				e.printStackTrace();
+//			}
+			if (statusCode >= 200 && statusCode < 300)
 			{
-				interpretedResponse = new HttpResponseWrapper(statusCode, entity,response.getAllHeaders());
+				interpretedResponse = new HttpResponseWrapper(statusCode, EntityUtils.toByteArray(entity), response.getAllHeaders());
 			} else
 			{
-				interpretedResponse = new HttpResponseWrapper(statusCode, response.getStatusLine().toString() , entity);
-			}			
+				interpretedResponse = new HttpResponseWrapper(statusCode, response.getStatusLine().toString(), EntityUtils.toByteArray(entity),response.getAllHeaders());
+			}
 			return interpretedResponse;
 		}
 	}

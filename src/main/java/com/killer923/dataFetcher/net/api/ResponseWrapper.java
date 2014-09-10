@@ -1,7 +1,6 @@
 package com.killer923.dataFetcher.net.api;
 
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 
 
 /**
@@ -19,7 +18,7 @@ public interface ResponseWrapper
 	/**
 	 * @return actual response.
 	 */
-	public HttpEntity getResponse();
+	public byte[] getResponse();
 	/**
 	 * @return the status message of respose.
 	 */
