@@ -1,8 +1,12 @@
 package com.killer923.dataFetcher.net.http;
 
+import java.io.IOException;
 import java.util.Arrays;
 
-import org.apache.commons.httpclient.Header;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
 
 import com.killer923.dataFetcher.net.api.ResponseWrapper;
 
@@ -10,11 +14,11 @@ import com.killer923.dataFetcher.net.api.ResponseWrapper;
 public final class HttpResponseWrapper implements ResponseWrapper
 {
 	private final int statusCode;
-	private final byte[] response;
+	private final HttpEntity response;
 	private final String statusMessage;
 	private Header[] headers;
 
-	protected HttpResponseWrapper(int statusCode, byte[] response, Header[] responseHeaders)
+	protected HttpResponseWrapper(int statusCode, HttpEntity response, Header[] responseHeaders)
 	{
 		this.statusCode = statusCode;
 		this.response = response;
@@ -22,37 +26,52 @@ public final class HttpResponseWrapper implements ResponseWrapper
 		this.headers = responseHeaders;
 	}
 
-	protected HttpResponseWrapper(int statusCode, String statusMessage, byte[] response)
+	protected HttpResponseWrapper(int statusCode, String statusMessage, HttpEntity response)
 	{
 		this.statusCode = statusCode;
 		this.statusMessage = statusMessage;
 		this.response = response;
 	}
 
+
+	@Override
 	public final int getStatusCode()
 	{
 		return statusCode;
 	}
 
-	public final byte[] getResponse()
+	@Override
+	public final HttpEntity getResponse()
 	{
-		return response.clone();
+		return response;
 	}
 
+	@Override
 	public final String getStatusMessage()
 	{
 		return new String(statusMessage);
 	}
-	
-	public final Header[] getHeaders()
+
+	@Override
+	public Header[] getHeaders()
 	{
-		return Arrays.copyOf(headers,headers.length);
+		return Arrays.copyOf(headers, headers.length);
 	}
 
 	@Override
 	public String toString()
 	{
-		return "HttpResponseWrapper [statusCode=" + statusCode + ", response=" + Arrays.toString(response) + ", statusMessage=" + statusMessage + ", headers=" + Arrays.toString(headers) + "]";
+		String responseToString=null;
+		try
+		{
+			responseToString = EntityUtils.toString(response);
+		} catch (ParseException e)
+		{
+			e.printStackTrace();
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		return "HttpResponseWrapper [statusCode=" + statusCode + ", response=" + responseToString + ", statusMessage=" + statusMessage + ", headers=" + Arrays.toString(headers) + "]";
 	}
-
 }

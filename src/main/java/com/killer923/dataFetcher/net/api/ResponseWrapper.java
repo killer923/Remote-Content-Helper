@@ -1,6 +1,8 @@
 package com.killer923.dataFetcher.net.api;
 
-import org.apache.commons.httpclient.Header;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+
 
 /**
  * All classes implementing this {@link ResponseWrapper} are immutable.
@@ -17,7 +19,7 @@ public interface ResponseWrapper
 	/**
 	 * @return actual response.
 	 */
-	public byte[] getResponse();
+	public HttpEntity getResponse();
 	/**
 	 * @return the status message of respose.
 	 */

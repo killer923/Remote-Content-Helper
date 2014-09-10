@@ -2,15 +2,18 @@ package com.killer923.dataFetcher.net.http;
 
 import java.io.IOException;
 
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
-import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.HttpContext;
 
 import com.killer923.dataFetcher.net.api.RequestDispatcher;
 import com.killer923.dataFetcher.net.api.ResponseWrapper;
@@ -21,36 +24,33 @@ public class HttpRequestDispatcher implements RequestDispatcher
 {
 	private int retryCount = 3;
 
+	@Override
 	public ResponseWrapper sendGETRequest(String url, Header[] headers) throws ResponseException
 	{
-		// Create an instance of HttpClient.
-		HttpClient client = new HttpClient();
+		return sendGETRequest(url, headers, null, null);
+	}
+	
+	@Override
+	public ResponseWrapper sendGETRequest(String url, Header[] headers,ResponseHandler<? extends ResponseWrapper> handler,HttpContext context) throws ResponseException
+	{
+		// Create an instance of DefaultHttpClient.
+		CloseableHttpClient client = HttpClientBuilder.create().disableAutomaticRetries().setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount, true)).build();;
 		// Create a method instance.
-		GetMethod method = new GetMethod(url);
-		// Provide custom retry handler is necessary
-		method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(retryCount, false));
+		HttpGet request = new HttpGet(url);
 		//set headers
-		if (headers != null)
+		request.setHeaders(headers);
+		
+		if(handler == null)
 		{
-			for (Header header : headers)
-			{
-				method.setRequestHeader(header);
-			}
+			handler =  new DefaultResponseHandler();
 		}
-		HttpResponseWrapper response = null;
+		ResponseWrapper response;		
 		// Execute the method.
 		try
 		{
-			int statusCode = client.executeMethod(method);
-			byte[] responseBody = method.getResponseBody();
-			if (statusCode == HttpStatus.SC_OK)
-			{
-				response = new HttpResponseWrapper(statusCode, responseBody, method.getResponseHeaders());
-			} else
-			{
-				response = new HttpResponseWrapper(statusCode, method.getStatusLine().toString(), responseBody);
-			}
-		} catch (HttpException httpe)
+			response=client.execute(request,handler,context);
+			
+		} catch (ClientProtocolException httpe)
 		{
 			System.err.println("Protocol error");
 			throw new ResponseException("Fatal protocol violation: " + httpe.getMessage(), httpe);
@@ -65,42 +65,51 @@ public class HttpRequestDispatcher implements RequestDispatcher
 		} finally
 		{
 			// Release the connection.
-			method.releaseConnection();
+			request.releaseConnection();
+			try
+			{
+				client.close();
+			} catch (IOException e)
+			{
+				e.printStackTrace();
+				System.out.println("retrying to close");
+				try
+				{
+					client.close();
+					System.out.println("closed successfully");
+				} catch (IOException e1)
+				{
+					e1.printStackTrace();
+				}
+			}
 		}
 		return response;
 	}
 
-	public ResponseWrapper sendPOSTRequest(String url, RequestEntity content, Header[] headers, int timeout) throws ResponseException
+	@Override
+	public ResponseWrapper sendPOSTRequest(String url, HttpEntity content, Header[] headers, int timeout) throws ResponseException
 	{
-		HttpResponseWrapper response = null;
-		
+		return sendPOSTRequest(url, content, headers, timeout, null, null);
+	}
+	@Override
+	public ResponseWrapper sendPOSTRequest(String url, HttpEntity content, Header[] headers, int timeout,ResponseHandler<? extends ResponseWrapper> responseHandler,HttpContext context) throws ResponseException
+	{
 		//prepare for request
-		HttpClient client = new HttpClient();
-		client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
+		CloseableHttpClient client = HttpClientBuilder.create().disableAutomaticRetries().setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount, true)).build();;
 		
-		PostMethod method = new PostMethod(url);
-		method.getParams().setBooleanParameter(HttpMethodParams.USE_EXPECT_CONTINUE, true);
-		if (headers != null)
+		HttpPost method = new HttpPost(url);
+		method.setConfig(RequestConfig.custom().setExpectContinueEnabled(true).build());
+		method.setHeaders(headers);
+		method.setEntity(content);
+		if(responseHandler == null)
 		{
-			for (Header header : headers)
-			{
-				method.setRequestHeader(header);
-			}
+			responseHandler = new DefaultResponseHandler();
 		}
-		method.setRequestEntity(content);
-
+		ResponseWrapper response =null;
 		try
 		{//make the request
-			int status = client.executeMethod(method);
-			byte[] responseBody = method.getResponseBody();
-			if (status == HttpStatus.SC_OK)
-			{
-				response = new HttpResponseWrapper(HttpStatus.SC_OK, responseBody, method.getResponseHeaders());
-			} else
-			{
-				response = new HttpResponseWrapper(status, method.getStatusLine().toString(), responseBody);
-			}
-		} catch (HttpException httpe)
+			response =client.execute(method, responseHandler, context);
+		} catch (ClientProtocolException httpe)
 		{
 			System.err.println("Protocol error");
 			throw new ResponseException("Fatal protocol violation: " + httpe.getMessage(), httpe);
@@ -127,5 +136,24 @@ public class HttpRequestDispatcher implements RequestDispatcher
 	public void setRetryCount(int retryCount)
 	{
 		this.retryCount = retryCount;
+	}
+
+	static class DefaultResponseHandler implements ResponseHandler<ResponseWrapper>
+	{
+		@Override
+		public ResponseWrapper handleResponse(HttpResponse response) throws ClientProtocolException, IOException
+		{
+			ResponseWrapper interpretedResponse;
+			int statusCode = response.getStatusLine().getStatusCode();
+			HttpEntity entity = response.getEntity();
+			if (statusCode >= 200 && statusCode <300)
+			{
+				interpretedResponse = new HttpResponseWrapper(statusCode, entity,response.getAllHeaders());
+			} else
+			{
+				interpretedResponse = new HttpResponseWrapper(statusCode, response.getStatusLine().toString() , entity);
+			}			
+			return interpretedResponse;
+		}
 	}
 }
